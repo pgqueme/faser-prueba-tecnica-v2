@@ -6,7 +6,7 @@ import { Task } from './models/task.model';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, AddTaskDialogComponent],
+  imports: [CommonModule, AddTaskDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
