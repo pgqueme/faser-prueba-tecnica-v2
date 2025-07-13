@@ -1,0 +1,71 @@
+<div class="container">
+  <header class="header">
+    <h1>{{ title }}</h1>
+    <button class="btn btn-primary" (click)="addTask()">
+      <span class="icon">+</span>
+      Agregar Tarea
+    </button>
+  </header>
+
+  <main class="main-content">
+    <div class="table-container">
+      <table class="task-table" *ngIf="tasks.length > 0; else emptyState">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Duración (minutos)</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr 
+            *ngFor="let task of tasks" 
+            [class.selected]="isTaskSelected(task)"
+            (click)="selectTask(task)"
+            class="task-row"
+          >
+            <td>{{ task.id }}</td>
+            <td>{{ task.title }}</td>
+            <td>{{ task.duration }}</td>
+            <td>
+              <button 
+                class="btn btn-danger btn-sm" 
+                (click)="deleteTask(); $event.stopPropagation()"
+                [disabled]="!isTaskSelected(task)"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <h3>No hay tareas</h3>
+          <p>Haz clic en "Agregar Tarea" para comenzar</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="info-panel" *ngIf="selectedTask">
+      <h3>Tarea Seleccionada</h3>
+      <div class="task-info">
+        <p><strong>ID:</strong> {{ selectedTask.id }}</p>
+        <p><strong>Título:</strong> {{ selectedTask.title }}</p>
+        <p><strong>Duración:</strong> {{ selectedTask.duration }} minutos</p>
+      </div>
+      <button class="btn btn-danger" (click)="deleteTask()">
+        Eliminar Tarea Seleccionada
+      </button>
+    </div>
+  </main>
+</div>
+
+<app-add-task-dialog 
+  *ngIf="showDialog"
+  (taskAdded)="onTaskAdded($event)"
+  (dialogClosed)="onDialogClosed()"
+></app-add-task-dialog>
