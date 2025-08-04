@@ -7,6 +7,9 @@
       Agregar Tarea
     </button>
     <button class="btn" (click)="openBulkUploadDialog()">Carga Masiva</button>
+    <button class="btn" (click)="fetchFromServer()" [disabled]="loadingFromServer">
+      {{ loadingFromServer ? 'cargando...' : 'obtener de servidor... '}}
+    </button>
   </div>
   </header>
 
