@@ -1,46 +1,55 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AddTaskDialogComponent } from './components/add-task-dialog/add-task-dialog.component';
+import { EditTaskDialogComponent } from './components/edit-task-dialog/edit-task-dialog.component';
 import { Task } from './models/task.model';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, AddTaskDialogComponent],
+  standalone: true,
+  imports: [CommonModule, AddTaskDialogComponent, EditTaskDialogComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   title = 'Control de Tareas';
   tasks: Task[] = [];
-  showDialog = false;
-  selectedTask: Task | null = null;
+
+  showAddDialog = false;
+  showEditDialog = false;
+  editingTask: Task | null = null;
 
   addTask() {
-    this.showDialog = true;
+    this.showAddDialog = true;
   }
 
   onTaskAdded(newTask: Task) {
     this.tasks.push(newTask);
-    this.showDialog = false;
+    this.showAddDialog = false;
   }
 
   onDialogClosed() {
-    this.showDialog = false;
+    this.showAddDialog = false;
   }
 
-  selectTask(task: Task) {
-    this.selectedTask = task;
+  openEditDialog(task: Task) {
+    // clonar por si el usuario cancela
+    this.editingTask = { ...task };
+    this.showEditDialog = true;
   }
 
-  deleteTask() {
-    if (this.selectedTask) {
-      this.tasks = this.tasks.filter(task => task.id !== this.selectedTask!.id);
-      this.selectedTask = null;
-    }
+  onTaskUpdated(updated: Task) {
+    this.tasks = this.tasks.map(t => (t.id === updated.id ? updated : t));
+    this.closeEditDialog();
   }
 
-  isTaskSelected(task: Task): boolean {
-    return this.selectedTask?.id === task.id;
+  onTaskDeleted(id: number) {
+    this.tasks = this.tasks.filter(t => t.id !== id);
+    this.closeEditDialog();
+  }
+
+  closeEditDialog() {
+    this.showEditDialog = false;
+    this.editingTask = null;
   }
 }
