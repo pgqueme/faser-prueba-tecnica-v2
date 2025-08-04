@@ -1,10 +1,13 @@
 <div class="container">
   <header class="header">
     <h1>{{ title }}</h1>
+    <div class="controls">
     <button class="btn btn-primary" (click)="addTask()">
       <span class="icon">+</span>
       Agregar Tarea
     </button>
+    <button class="btn" (click)="openBulkUploadDialog()">Carga Masiva</button>
+  </div>
   </header>
 
   <main class="main-content">
@@ -55,3 +58,9 @@
   (taskDeleted)="onTaskDeleted($event)"
   (dialogClosed)="closeEditDialog()"
 ></app-edit-task-dialog>
+
+<app-bulk-upload-dialog
+  *ngIf="showBulkDialog"
+  (tasksParsed)="onBulkTasksAdded($event)"
+  (dialogClosed)="showBulkDialog = false"
+></app-bulk-upload-dialog>

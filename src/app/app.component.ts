@@ -2,12 +2,18 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AddTaskDialogComponent } from './components/add-task-dialog/add-task-dialog.component';
 import { EditTaskDialogComponent } from './components/edit-task-dialog/edit-task-dialog.component';
+import { BulkUploadDialogComponent } from './components/bulk-upload-dialog/bulk-upload-dialog.component';
 import { Task } from './models/task.model';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, AddTaskDialogComponent, EditTaskDialogComponent],
+  imports: [
+    CommonModule,
+    AddTaskDialogComponent,
+    EditTaskDialogComponent,
+    BulkUploadDialogComponent
+  ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
@@ -17,6 +23,7 @@ export class AppComponent {
 
   showAddDialog = false;
   showEditDialog = false;
+  showBulkDialog = false;
   editingTask: Task | null = null;
 
   addTask() {
@@ -30,10 +37,11 @@ export class AppComponent {
 
   onDialogClosed() {
     this.showAddDialog = false;
+    this.showBulkDialog = false;
+    this.showEditDialog = false;
   }
 
   openEditDialog(task: Task) {
-    // clonar por si el usuario cancela
     this.editingTask = { ...task };
     this.showEditDialog = true;
   }
@@ -51,5 +59,14 @@ export class AppComponent {
   closeEditDialog() {
     this.showEditDialog = false;
     this.editingTask = null;
+  }
+
+  openBulkUploadDialog() {
+    this.showBulkDialog = true;
+  }
+
+  onBulkTasksAdded(newTasks: Task[]) {
+    this.tasks.push(...newTasks);
+    this.showBulkDialog = false;
   }
 }
