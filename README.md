@@ -42,3 +42,6 @@ Agrega un botón junto al de carga masiva y agregar tarea llamado "Obtener de se
 `https://jsonplaceholder.typicode.com/todos`
 
 Este devuelve un JSON con 200 tareas. Se deberán tomar 5 tareas aleatorias del listado y agregarlas a la tabla de tareas. Usar la propiedad `title` para el título, y la propiedad `userId` como la duración de la tarea.
+
+### Finalización
+Al finalizar la prueba, dejar publicados todos los cambios realizados y enviar un correo a la persona con la que ha realizado el proceso de reclutamiento para notificar la finalización.
