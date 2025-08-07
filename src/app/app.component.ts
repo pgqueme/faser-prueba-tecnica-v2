@@ -4,6 +4,8 @@ import { AddTaskDialogComponent } from './components/add-task-dialog/add-task-di
 import { EditTaskDialogComponent } from './components/edit-task-dialog/edit-task-dialog.component';
 import { Task } from './models/task.model';
 import { BulkTaskDialogComponent } from './components/bulk-task-dialog.component';
+import { HttpClient } from '@angular/common/http';//importar HttpClient
+import { inject } from '@angular/core';//Inyección de dependencias
 
 @Component({
   selector: 'app-root',
@@ -71,5 +73,32 @@ export class AppComponent {
       });
     }
     this.showBulkDialog = false;
+  }
+
+  http = inject(HttpClient); //Inyección de HttpClient
+  //Método para obtener tareas de un servidor simulado
+  fetchTasks() {
+    this.http.get<any[]>('https://jsonplaceholder.typicode.com/todos').subscribe({
+      next: (todos) => {
+        // Seleccionar 5 tareas aleatorias
+        const randomTasks = this.getRandomTasks(todos, 5);
+        const mappedTasks = randomTasks.map(todo => ({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          title: todo.title,
+          duration: todo.userId
+        }));
+        this.tasks.push(...mappedTasks);
+      },
+      error: (err) => {
+        console.error('Error al obtener tareas del servidor:', err);
+        alert('No se pudo obtener las tareas del servidor.');
+      }
+    });
+  }
+
+  //Función para obtener n elementos aleatorios de una lista
+  getRandomTasks(list: any[], count: number) {
+    const shuffled = [...list].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
   }
 }
