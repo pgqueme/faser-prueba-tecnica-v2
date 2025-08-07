@@ -1,20 +1,24 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AddTaskDialogComponent } from './components/add-task-dialog/add-task-dialog.component';
+import { EditTaskDialogComponent } from './components/edit-task-dialog/edit-task-dialog.component';
 import { Task } from './models/task.model';
+import { BulkTaskDialogComponent } from './components/bulk-task-dialog.component';
+import { HttpClient } from '@angular/common/http';//importar HttpClient
+import { inject } from '@angular/core';//Inyección de dependencias
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, AddTaskDialogComponent],
+  imports: [CommonModule, AddTaskDialogComponent, EditTaskDialogComponent, BulkTaskDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'Control de Tareas';
+  title = 'Control de Tareas - Jorge Estuardo Pumay Soy';
   tasks: Task[] = [];
   showDialog = false;
-  selectedTask: Task | null = null;
+  taskToEdit: Task | null = null; //tarea seleccionada para editar
+  showBulkDialog = false;
 
   addTask() {
     this.showDialog = true;
@@ -29,18 +33,72 @@ export class AppComponent {
     this.showDialog = false;
   }
 
-  selectTask(task: Task) {
-    this.selectedTask = task;
+  // Abrir el diálogo de edición con una copia de la tarea
+  editTask(task: Task) {
+    this.taskToEdit = { ...task }; 
   }
 
-  deleteTask() {
-    if (this.selectedTask) {
-      this.tasks = this.tasks.filter(task => task.id !== this.selectedTask!.id);
-      this.selectedTask = null;
+  onTaskUpdated(updatedTask: Task) {
+    const index = this.tasks.findIndex(t => t.id === updatedTask.id);
+    if (index !== -1) {
+      this.tasks[index] = updatedTask;
     }
+    this.taskToEdit = null;
   }
 
-  isTaskSelected(task: Task): boolean {
-    return this.selectedTask?.id === task.id;
+  onTaskDeleted(taskToDelete: Task) {
+    this.tasks = this.tasks.filter(t => t.id !== taskToDelete.id);
+    this.taskToEdit = null;
+  }
+
+  onEditDialogClosed() {
+    this.taskToEdit = null;
+  }
+
+  //metodo para abrir el diálogo de carga masiva
+  openBulkDialog() {
+    this.showBulkDialog = true;
+  }
+
+  onBulkDialogClosed() {
+    this.showBulkDialog = false;
+  }
+
+  onBulkTasksAdded(tasks: { title: string; duration: number }[]) {
+    for (const task of tasks) {
+      this.tasks.push({
+        id: Date.now() + Math.floor(Math.random() * 1000), // genera un ID único
+        title: task.title,
+        duration: task.duration
+      });
+    }
+    this.showBulkDialog = false;
+  }
+
+  http = inject(HttpClient); //Inyección de HttpClient
+  //Método para obtener tareas de un servidor simulado
+  fetchTasks() {
+    this.http.get<any[]>('https://jsonplaceholder.typicode.com/todos').subscribe({
+      next: (todos) => {
+        // Seleccionar 5 tareas aleatorias
+        const randomTasks = this.getRandomTasks(todos, 5);
+        const mappedTasks = randomTasks.map(todo => ({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          title: todo.title,
+          duration: todo.userId
+        }));
+        this.tasks.push(...mappedTasks);
+      },
+      error: (err) => {
+        console.error('Error al obtener tareas del servidor:', err);
+        alert('No se pudo obtener las tareas del servidor.');
+      }
+    });
+  }
+
+  //Función para obtener n elementos aleatorios de una lista
+  getRandomTasks(list: any[], count: number) {
+    const shuffled = [...list].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
   }
 }
