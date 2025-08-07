@@ -5,6 +5,10 @@
       <span class="icon">+</span>
       Agregar Tarea
     </button>
+    <button class="btn btn-secondary" (click)="openBulkDialog()"> <!-- Método para abrir el diálogo de carga masiva -->
+      <span class="icon">📥</span>
+      Carga masiva
+    </button>
   </header>
 
   <main class="main-content">
@@ -56,3 +60,9 @@
   (taskDeleted)="onTaskDeleted($event)"
   (dialogClosed)="onEditDialogClosed()"
 ></app-edit-task-dialog>
+
+<app-bulk-task-dialog
+  *ngIf="showBulkDialog"
+  (tasksAdded)="onBulkTasksAdded($event)"
+  (dialogClosed)="onBulkDialogClosed()"
+></app-bulk-task-dialog>
