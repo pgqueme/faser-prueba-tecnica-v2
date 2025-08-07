@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AddTaskDialogComponent } from './components/add-task-dialog/add-task-dialog.component';
+import { EditTaskDialogComponent } from './components/edit-task-dialog/edit-task-dialog.component';
 import { Task } from './models/task.model';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, AddTaskDialogComponent],
+  imports: [CommonModule, AddTaskDialogComponent, EditTaskDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -14,7 +14,7 @@ export class AppComponent {
   title = 'Control de Tareas - Jorge Estuardo Pumay Soy';
   tasks: Task[] = [];
   showDialog = false;
-  selectedTask: Task | null = null;
+  taskToEdit: Task | null = null; //tarea seleccionada para editar
 
   addTask() {
     this.showDialog = true;
@@ -29,18 +29,25 @@ export class AppComponent {
     this.showDialog = false;
   }
 
-  selectTask(task: Task) {
-    this.selectedTask = task;
+  // Abrir el diálogo de edición con una copia de la tarea
+  editTask(task: Task) {
+    this.taskToEdit = { ...task }; 
   }
 
-  deleteTask() {
-    if (this.selectedTask) {
-      this.tasks = this.tasks.filter(task => task.id !== this.selectedTask!.id);
-      this.selectedTask = null;
+  onTaskUpdated(updatedTask: Task) {
+    const index = this.tasks.findIndex(t => t.id === updatedTask.id);
+    if (index !== -1) {
+      this.tasks[index] = updatedTask;
     }
+    this.taskToEdit = null;
   }
 
-  isTaskSelected(task: Task): boolean {
-    return this.selectedTask?.id === task.id;
+  onTaskDeleted(taskToDelete: Task) {
+    this.tasks = this.tasks.filter(t => t.id !== taskToDelete.id);
+    this.taskToEdit = null;
+  }
+
+  onEditDialogClosed() {
+    this.taskToEdit = null;
   }
 }

@@ -15,28 +15,17 @@
             <th>ID</th>
             <th>Título</th>
             <th>Duración (minutos)</th>
-            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr 
-            *ngFor="let task of tasks" 
-            [class.selected]="isTaskSelected(task)"
-            (click)="selectTask(task)"
+            *ngFor="let task of tasks"
             class="task-row"
-          >
+            
+            (click)="editTask(task)">
             <td>{{ task.id }}</td>
             <td>{{ task.title }}</td>
             <td>{{ task.duration }}</td>
-            <td>
-              <button 
-                class="btn btn-danger btn-sm" 
-                (click)="deleteTask(); $event.stopPropagation()"
-                [disabled]="!isTaskSelected(task)"
-              >
-                Eliminar
-              </button>
-            </td>
           </tr>
         </tbody>
       </table>
@@ -50,17 +39,7 @@
       </ng-template>
     </div>
 
-    <div class="info-panel" *ngIf="selectedTask">
-      <h3>Tarea Seleccionada</h3>
-      <div class="task-info">
-        <p><strong>ID:</strong> {{ selectedTask.id }}</p>
-        <p><strong>Título:</strong> {{ selectedTask.title }}</p>
-        <p><strong>Duración:</strong> {{ selectedTask.duration }} minutos</p>
-      </div>
-      <button class="btn btn-danger" (click)="deleteTask()">
-        Eliminar Tarea Seleccionada
-      </button>
-    </div>
+    
   </main>
 </div>
 
@@ -69,3 +48,11 @@
   (taskAdded)="onTaskAdded($event)"
   (dialogClosed)="onDialogClosed()"
 ></app-add-task-dialog>
+
+<app-edit-task-dialog
+  *ngIf="taskToEdit"
+  [task]="taskToEdit"
+  (taskUpdated)="onTaskUpdated($event)"
+  (taskDeleted)="onTaskDeleted($event)"
+  (dialogClosed)="onEditDialogClosed()"
+></app-edit-task-dialog>
