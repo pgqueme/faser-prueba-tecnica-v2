@@ -11,7 +11,7 @@ import { Task } from './models/task.model';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'Control de Tareas';
+  title = 'Control de Tareas - Jorge Estuardo Pumay Soy';
   tasks: Task[] = [];
   showDialog = false;
   selectedTask: Task | null = null;
