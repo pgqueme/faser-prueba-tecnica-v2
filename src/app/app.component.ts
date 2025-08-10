@@ -13,6 +13,30 @@ import { Task } from './models/task.model';
 })
 export class AppComponent {
   /**
+   * Obtiene 5 tareas aleatorias desde el endpoint externo y las agrega a la tabla.
+   */
+  async fetchTasksFromServer() {
+    try {
+      // Realiza la petición HTTP GET al endpoint externo
+      const response = await fetch('https://jsonplaceholder.typicode.com/todos');
+      const data = await response.json();
+      // Selecciona 5 tareas aleatorias
+      const shuffled = data.sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 5);
+      // Procesa y agrega las tareas a la tabla principal
+      selected.forEach((item: any) => {
+        this.tasks.push({
+          id: Date.now() + Math.floor(Math.random() * 10000),
+          title: item.title,
+          duration: typeof item.userId === 'number' ? item.userId : 10
+        });
+      });
+    } catch (error) {
+      // Manejo de errores: muestra en consola y podría mostrar un mensaje en la UI
+      console.error('Error al obtener tareas del servidor:', error);
+    }
+  }
+  /**
    * Maneja el evento de tareas agregadas por carga masiva.
    */
   onTasksBulkAdded(tasks: { title: string; duration: number }[]) {

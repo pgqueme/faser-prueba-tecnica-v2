@@ -13,8 +13,11 @@
     </button>
     <!-- Botón para abrir el diálogo de carga masiva de tareas -->
     <button class="btn btn-secondary" (click)="openBulkDialog()">
-      <span class="icon">&#128190;</span>
       Carga masiva
+    </button>
+    <!-- Botón para obtener tareas desde el servidor externo -->
+    <button class="btn btn-info" (click)="fetchTasksFromServer()">
+      Obtener de servidor
     </button>
   </header>
 
