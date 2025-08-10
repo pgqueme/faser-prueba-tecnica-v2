@@ -1,9 +1,23 @@
+<!-- Diálogo de carga masiva de tareas -->
+<app-bulk-task-dialog
+  *ngIf="showBulkDialog"
+  (tasksBulkAdded)="onTasksBulkAdded($event)"
+  (dialogClosed)="showBulkDialog = false"
+></app-bulk-task-dialog>
 <div class="container">
   <header class="header">
     <h1>{{ title }}</h1>
     <button class="btn btn-primary" (click)="addTask()">
       <span class="icon">+</span>
       Agregar Tarea
+    </button>
+    <!-- Botón para abrir el diálogo de carga masiva de tareas -->
+    <button class="btn btn-secondary" (click)="openBulkDialog()">
+      Carga masiva
+    </button>
+    <!-- Botón para obtener tareas desde el servidor externo -->
+    <button class="btn btn-info" (click)="fetchTasksFromServer()">
+      Obtener de servidor
     </button>
   </header>
 
@@ -15,7 +29,7 @@
             <th>ID</th>
             <th>Título</th>
             <th>Duración (minutos)</th>
-            <th>Acciones</th>
+            <!-- Se elimina la columna de acciones para que la edición/eliminación se realice desde el diálogo -->
           </tr>
         </thead>
         <tbody>
@@ -28,15 +42,7 @@
             <td>{{ task.id }}</td>
             <td>{{ task.title }}</td>
             <td>{{ task.duration }}</td>
-            <td>
-              <button 
-                class="btn btn-danger btn-sm" 
-                (click)="deleteTask(); $event.stopPropagation()"
-                [disabled]="!isTaskSelected(task)"
-              >
-                Eliminar
-              </button>
-            </td>
+            <!-- Se elimina el botón de eliminar, ahora la edición/eliminación será desde el diálogo -->
           </tr>
         </tbody>
       </table>
@@ -57,15 +63,17 @@
         <p><strong>Título:</strong> {{ selectedTask.title }}</p>
         <p><strong>Duración:</strong> {{ selectedTask.duration }} minutos</p>
       </div>
-      <button class="btn btn-danger" (click)="deleteTask()">
-        Eliminar Tarea Seleccionada
-      </button>
+  <!-- Botón de eliminar removido, ahora la eliminación se realiza desde el diálogo de edición -->
     </div>
   </main>
 </div>
 
+<!-- El diálogo ahora soporta edición y eliminación, se le pasa la tarea a editar si existe -->
 <app-add-task-dialog 
   *ngIf="showDialog"
+  [taskToEdit]="taskToEdit"
   (taskAdded)="onTaskAdded($event)"
+  (taskEdited)="onTaskEdited($event)"
+  (taskDeleted)="onTaskDeleted($event)"
   (dialogClosed)="onDialogClosed()"
 ></app-add-task-dialog>
