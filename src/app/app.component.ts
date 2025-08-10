@@ -11,7 +11,8 @@ import { Task } from './models/task.model';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'Control de Tareas';
+  // Título principal de la aplicación, con mi nombre
+  title = 'Control de Tareas - Sergio Quej';
   tasks: Task[] = [];
   showDialog = false;
   selectedTask: Task | null = null;
