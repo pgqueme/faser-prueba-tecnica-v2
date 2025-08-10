@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Task } from '../../models/task.model';
@@ -10,7 +10,7 @@ import { Task } from '../../models/task.model';
   template: `
     <div class="dialog-overlay" (click)="close()">
       <div class="dialog-content" (click)="$event.stopPropagation()">
-        <h2>Agregar Nueva Tarea</h2>
+        <h2>{{ isEditMode ? 'Editar Tarea' : 'Agregar Nueva Tarea' }}</h2>
         <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
           <div class="form-group">
             <label for="title">Título:</label>
@@ -25,7 +25,6 @@ import { Task } from '../../models/task.model';
               El título es requerido
             </div>
           </div>
-          
           <div class="form-group">
             <label for="duration">Duración (minutos):</label>
             <input 
@@ -40,10 +39,12 @@ import { Task } from '../../models/task.model';
               La duración debe ser un número mayor a 0
             </div>
           </div>
-          
           <div class="dialog-actions">
             <button type="button" class="btn btn-secondary" (click)="close()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="taskForm.invalid">Agregar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="taskForm.invalid">
+              {{ isEditMode ? 'Guardar Cambios' : 'Agregar' }}
+            </button>
+            <button *ngIf="isEditMode" type="button" class="btn btn-danger" (click)="onDelete()">Eliminar</button>
           </div>
         </form>
       </div>
@@ -150,31 +151,80 @@ import { Task } from '../../models/task.model';
   `]
 })
 export class AddTaskDialogComponent {
+  /**
+   * Tarea a editar. Si está presente, el diálogo funciona en modo edición.
+   */
+  @Input() taskToEdit: Task | null = null;
+  /**
+   * Evento emitido al agregar una nueva tarea.
+   */
   @Output() taskAdded = new EventEmitter<Task>();
+  /**
+   * Evento emitido al editar una tarea existente.
+   */
+  @Output() taskEdited = new EventEmitter<Task>();
+  /**
+   * Evento emitido al eliminar una tarea existente.
+   */
+  @Output() taskDeleted = new EventEmitter<number>();
+  /**
+   * Evento emitido al cerrar el diálogo.
+   */
   @Output() dialogClosed = new EventEmitter<void>();
-  
+
   taskForm: FormGroup;
-  
+  isEditMode = false;
+
   constructor(private fb: FormBuilder) {
+    // Inicializa el formulario vacío
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(1)]],
       duration: ['', [Validators.required, Validators.min(1)]]
     });
   }
-  
+
+  ngOnInit() {
+    // Si se recibe una tarea para editar, se inicializa el formulario con sus datos
+    if (this.taskToEdit) {
+      this.isEditMode = true;
+      this.taskForm.patchValue({
+        title: this.taskToEdit.title,
+        duration: this.taskToEdit.duration
+      });
+    }
+  }
+
   onSubmit() {
     if (this.taskForm.valid) {
-      const newTask: Task = {
-        id: Date.now(), // Generar ID único
-        title: this.taskForm.value.title,
-        duration: this.taskForm.value.duration
-      };
-      
-      this.taskAdded.emit(newTask);
+      if (this.isEditMode && this.taskToEdit) {
+        // Editar tarea existente
+        const updatedTask: Task = {
+          ...this.taskToEdit,
+          title: this.taskForm.value.title,
+          duration: this.taskForm.value.duration
+        };
+        this.taskEdited.emit(updatedTask);
+      } else {
+        // Agregar nueva tarea
+        const newTask: Task = {
+          id: Date.now(), // Generar ID único
+          title: this.taskForm.value.title,
+          duration: this.taskForm.value.duration
+        };
+        this.taskAdded.emit(newTask);
+      }
       this.close();
     }
   }
-  
+
+  onDelete() {
+    // Emitir evento para eliminar la tarea
+    if (this.taskToEdit) {
+      this.taskDeleted.emit(this.taskToEdit.id);
+      this.close();
+    }
+  }
+
   close() {
     this.dialogClosed.emit();
   }

@@ -16,31 +16,67 @@ export class AppComponent {
   tasks: Task[] = [];
   showDialog = false;
   selectedTask: Task | null = null;
+  /**
+   * Tarea que se está editando actualmente. Si es null, el diálogo está en modo agregar.
+   */
+  taskToEdit: Task | null = null;
 
+  /**
+   * Abre el diálogo en modo agregar nueva tarea.
+   */
   addTask() {
+    this.taskToEdit = null;
     this.showDialog = true;
   }
 
+  /**
+   * Maneja el evento de agregar una nueva tarea.
+   */
   onTaskAdded(newTask: Task) {
     this.tasks.push(newTask);
     this.showDialog = false;
   }
 
+  /**
+   * Maneja el evento de edición de una tarea existente.
+   */
+  onTaskEdited(editedTask: Task) {
+    this.tasks = this.tasks.map(task => task.id === editedTask.id ? editedTask : task);
+    this.showDialog = false;
+    this.selectedTask = null;
+  }
+
+  /**
+   * Maneja el evento de eliminación de una tarea existente.
+   */
+  onTaskDeleted(taskId: number) {
+    this.tasks = this.tasks.filter(task => task.id !== taskId);
+    this.showDialog = false;
+    this.selectedTask = null;
+  }
+
+  /**
+   * Maneja el cierre del diálogo, sin cambios.
+   */
   onDialogClosed() {
     this.showDialog = false;
+    this.taskToEdit = null;
   }
 
+  /**
+   * Al hacer clic en una fila, abre el diálogo en modo edición para esa tarea.
+   */
   selectTask(task: Task) {
     this.selectedTask = task;
+    this.taskToEdit = task;
+    this.showDialog = true;
   }
 
-  deleteTask() {
-    if (this.selectedTask) {
-      this.tasks = this.tasks.filter(task => task.id !== this.selectedTask!.id);
-      this.selectedTask = null;
-    }
-  }
+  // La eliminación ahora se realiza desde el diálogo de edición
 
+  /**
+   * Indica si la tarea está seleccionada (para estilos en la tabla).
+   */
   isTaskSelected(task: Task): boolean {
     return this.selectedTask?.id === task.id;
   }
