@@ -2,15 +2,40 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AddTaskDialogComponent } from './components/add-task-dialog/add-task-dialog.component';
+import { BulkTaskDialogComponent } from './components/bulk-task-dialog/bulk-task-dialog.component';
 import { Task } from './models/task.model';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, AddTaskDialogComponent],
+  imports: [CommonModule, AddTaskDialogComponent, BulkTaskDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
+  /**
+   * Maneja el evento de tareas agregadas por carga masiva.
+   */
+  onTasksBulkAdded(tasks: { title: string; duration: number }[]) {
+    // Agrega cada tarea procesada al arreglo principal, generando un id único
+    tasks.forEach(t => {
+      this.tasks.push({
+        id: Date.now() + Math.floor(Math.random() * 10000),
+        title: t.title,
+        duration: t.duration
+      });
+    });
+    this.showBulkDialog = false;
+  }
+  /**
+   * Estado para mostrar el diálogo de carga masiva de tareas.
+   */
+  showBulkDialog = false;
+  /**
+   * Abre el diálogo de carga masiva de tareas.
+   */
+  openBulkDialog() {
+    this.showBulkDialog = true;
+  }
   // Título principal de la aplicación, con mi nombre
   title = 'Control de Tareas - Sergio Quej';
   tasks: Task[] = [];

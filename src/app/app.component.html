@@ -1,9 +1,20 @@
+<!-- Diálogo de carga masiva de tareas -->
+<app-bulk-task-dialog
+  *ngIf="showBulkDialog"
+  (tasksBulkAdded)="onTasksBulkAdded($event)"
+  (dialogClosed)="showBulkDialog = false"
+></app-bulk-task-dialog>
 <div class="container">
   <header class="header">
     <h1>{{ title }}</h1>
     <button class="btn btn-primary" (click)="addTask()">
       <span class="icon">+</span>
       Agregar Tarea
+    </button>
+    <!-- Botón para abrir el diálogo de carga masiva de tareas -->
+    <button class="btn btn-secondary" (click)="openBulkDialog()">
+      <span class="icon">&#128190;</span>
+      Carga masiva
     </button>
   </header>
 
