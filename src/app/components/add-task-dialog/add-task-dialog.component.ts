@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+// + Soporte para recibir una tarea a editar y reaccionar a cambios (@Input)
+import { Component, EventEmitter, Output, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Task } from '../../models/task.model';
@@ -10,7 +11,7 @@ import { Task } from '../../models/task.model';
   template: `
     <div class="dialog-overlay" (click)="close()">
       <div class="dialog-content" (click)="$event.stopPropagation()">
-        <h2>Agregar Nueva Tarea</h2>
+        <h2>{{ isEdit ? 'Editar Tarea' : 'Agregar Nueva Tarea' }}</h2>
         <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
           <div class="form-group">
             <label for="title">Título:</label>
@@ -40,10 +41,15 @@ import { Task } from '../../models/task.model';
               La duración debe ser un número mayor a 0
             </div>
           </div>
-          
+
           <div class="dialog-actions">
             <button type="button" class="btn btn-secondary" (click)="close()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="taskForm.invalid">Agregar</button>
+          <!-- Solo visible en modo edición -->
+            <button *ngIf="isEdit" type="button" class="btn btn-danger" (click)="onDelete()">Eliminar</button>
+          <!-- El texto cambia según el modo -->
+            <button type="submit" class="btn btn-primary" [disabled]="taskForm.invalid">
+              {{ isEdit ? 'Guardar' : 'Agregar' }}
+            </button>
           </div>
         </form>
       </div>
@@ -111,7 +117,7 @@ import { Task } from '../../models/task.model';
     
     .dialog-actions {
       display: flex;
-      justify-content: flex-end;
+      justify-content:center; /* centrado horizontal */
       gap: 1rem;
       margin-top: 1.5rem;
     }
@@ -123,6 +129,15 @@ import { Task } from '../../models/task.model';
       font-size: 1rem;
       cursor: pointer;
       transition: background-color 0.2s;
+    }
+
+    .btn-danger{
+      background-color:#dc3545;
+      color:#fff;
+    }
+  
+    .btn-danger:hover{
+      background-color:#b02a37;
     }
     
     .btn-primary {
@@ -149,31 +164,66 @@ import { Task } from '../../models/task.model';
     }
   `]
 })
-export class AddTaskDialogComponent {
+// Doc: activamos hook para precargar el formulario cuando llega una tarea
+export class AddTaskDialogComponent implements OnChanges {
+  // MODO EDICIÓN: si llega una tarea, el diálogo cambia a "Editar"
+  @Input() task: Task | null = null;
   @Output() taskAdded = new EventEmitter<Task>();
   @Output() dialogClosed = new EventEmitter<void>();
+  // Eventos específicos para edición/eliminación
+  @Output() taskUpdated = new EventEmitter<Task>();   // cuando se guarda una edición
+  @Output() taskDeleted = new EventEmitter<Task>();   // cuando se elimina desde el diálogo
   
   taskForm: FormGroup;
   
   constructor(private fb: FormBuilder) {
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(1)]],
-      duration: ['', [Validators.required, Validators.min(1)]]
+      // Doc: en alta proponemos 10 min por defecto
+      duration: [10, [Validators.required, Validators.min(1)]]
     });
   }
-  
-  onSubmit() {
-    if (this.taskForm.valid) {
-      const newTask: Task = {
-        id: Date.now(), // Generar ID único
-        title: this.taskForm.value.title,
-        duration: this.taskForm.value.duration
-      };
-      
-      this.taskAdded.emit(newTask);
-      this.close();
+
+  // Indica si el diálogo está en modo edición (llega una tarea vía @Input)
+  get isEdit(): boolean {
+    return !!this.task;
+  }
+
+  // Cuando cambie el @Input task, precargamos el formulario con sus datos
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['task']?.currentValue) {
+      this.taskForm.setValue({
+        title: this.task!.title,
+        duration: this.task!.duration
+      });
     }
   }
+
+// en edición emitimos taskUpdated; en alta emitimos taskAdded
+  onSubmit() {
+  if (this.taskForm.valid) {
+    const { title, duration } = this.taskForm.value;
+
+    if (this.isEdit) {
+      const updated: Task = { ...this.task!, title, duration };
+      this.taskUpdated.emit(updated);
+    } else {
+      const newTask: Task = { id: Date.now(), title, duration };
+      this.taskAdded.emit(newTask);
+    }
+
+    this.close();
+  }
+}
+
+// elimina la tarea actual (solo en modo edición)
+onDelete() {
+  if (this.isEdit && this.task) {
+    this.taskDeleted.emit(this.task);
+    this.close();
+  }
+}
+
   
   close() {
     this.dialogClosed.emit();
