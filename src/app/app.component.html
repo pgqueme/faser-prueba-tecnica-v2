@@ -5,6 +5,9 @@
       <span class="icon">+</span>
       Agregar Tarea
     </button>
+    <button class="btn btn-outline-primary" (click)="openBulk()">Carga masiva</button>
+    <button class="btn btn-outline-secondary" (click)="fetchFromServer()">Obtener de servidor</button>
+    <button class="btn btn-danger" (click)="clearAll()" [disabled]="!tasks.length">Eliminar todas</button>
   </header>
 
   <main class="main-content">
@@ -60,3 +63,9 @@
   (taskDeleted)="onTaskDeleted($event)"
   (dialogClosed)="onDialogClosed()"
 ></app-add-task-dialog>
+
+<app-bulk-import-dialog
+  *ngIf="showBulkDialog"
+  (tasksAdded)="onTasksImported($event)"
+  (dialogClosed)="onBulkClosed()"
+></app-bulk-import-dialog>
